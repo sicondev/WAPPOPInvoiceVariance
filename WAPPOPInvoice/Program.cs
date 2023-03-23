@@ -92,9 +92,15 @@ namespace WAPPOPInvoice
             {
                 LogGeneral("Creating Purchase Order...");
 
+                decimal orderLineValue = 100m;
+                decimal orderLineTaxValue = 0m;
+                decimal invoiceValue = 150m;
+                decimal invoiceTaxValue = 0m;
+
                 using (Sage.Accounting.POP.POPOrder popOrder = new Sage.Accounting.POP.POPOrder())
                 {
-                    popOrder.Supplier = Sage.Accounting.PurchaseLedger.SupplierFactory.Factory.Fetch("ATL001");
+                    popOrder.Supplier = Sage.Accounting.PurchaseLedger.SupplierFactory.Factory.Fetch("18G001");
+                    popOrder.DocumentNo = $"SICON{Environment.TickCount}";
 
                     popOrder.Update();
 
@@ -102,12 +108,19 @@ namespace WAPPOPInvoice
 
                     line.POPOrderReturn = popOrder;
                     line.ItemDescription = "Test Line";
-                    line.UnitBuyingPrice = 100m;
-                    line.ConfirmationIntentType = Sage.Accounting.POP.POPConfirmationIntentEnum.Confirm;
+                    line.LineQuantity = 1;
+                    line.UnitBuyingPrice = orderLineValue;
+                    line.LineTaxValue = orderLineTaxValue;
+                    line.ConfirmationIntentType = Sage.Accounting.POP.POPConfirmationIntentEnum.NoConfirmation;
+                    line.CalculateValues();
                     line.Post();
 
+                    popOrder.Lines.Add(line);
+
                     popOrder.CalculateValues();
+                    popOrder.Confirm();
                     popOrder.Post();
+                    popOrder.UnlockChildren();
 
                     LogSuccess($"Purchase Order '{popOrder.DocumentNo}' posted successfully.");
 
@@ -118,11 +131,26 @@ namespace WAPPOPInvoice
                         coordinator.MatchInvoices = true;
                         coordinator.Supplier = popOrder.Supplier;
                         coordinator.OrderReturn = popOrder;
+                        coordinator.InvCredGoodsValue = invoiceValue;
+                        coordinator.InvCredTaxValue = invoiceTaxValue;
                         coordinator.PopulateInvCredItems();
+
+                        LogGeneral($"{coordinator.InvCredItems.Count} items found.");
+
+                        foreach(Sage.Accounting.POP.POPInvCredItem item in coordinator.InvCredItems)
+                        {
+                            item.IsSelected = true;
+                            item.NewDiscountedUnitPrice = invoiceValue;
+
+                            LogGeneral($"Item '{item.ItemDescription}' selected?: {item.IsSelected}");
+                        }
 
                         LogInfo("Checking WAP Variance...");
 
                         Sicon.Sage200.WAP.AddonPackage.Objects.Configs.WAPSettings.UpdateConfiguration();
+
+                        //Add allowable warning for values dont match
+                        Sage.Accounting.Application.AllowableWarnings.Add(coordinator, typeof(Sage.Accounting.Exceptions.Ex20451Exception));
 
                         using (Sicon.Sage200.WAP.AddonPackage.Objects.Objects.Instruments.POPInvoiceVarianceInstrument varianceInstrument = new Sicon.Sage200.WAP.AddonPackage.Objects.Objects.Instruments.POPInvoiceVarianceInstrument(coordinator))
                         {
@@ -133,17 +161,25 @@ namespace WAPPOPInvoice
                             if (!string.IsNullOrEmpty(varianceInstrument.VarianceMessage) && varianceInstrument.HasVariance)
                                 varianceInstrument.VarianceComments = "Additional Comments";
 
+                            LogGeneral("About to Post");
 
                             Sage.Accounting.PurchaseLedger.PendingPurchaseBatchEntry entry = coordinator.Post();
+
+                            if (entry != null)
+                                LogGeneral("Entry Posted.");
+                            else
+                            {
+                                LogWarning("No Entry was posted.");
+                            }
 
                             if (entry?.BatchItems?.First is Sage.Accounting.TradeLedger.IPendingTradingBatchItem pendingItem
                                 && pendingItem?.TradeInstrument is Sage.Accounting.PurchaseLedger.PurchaseNotificationInstrument invoiceInstrument)
                             {
-                                LogSuccess($"Invoice '{(invoiceInstrument?.ActualPostedAccountEntry?.URN ?? invoiceInstrument?.ActualPendingAccountEntry?.URN)}' Posted Successfully");
+                                LogSuccess($"Invoice '{(invoiceInstrument.InstrumentNo)}' Posted Successfully");
 
                                 using (Sicon.Sage200.WAP.AddonPackage.Objects.SiconWAPInvExtra invExtra = varianceInstrument.WAPInvoiceExtra)
                                 {
-                                    if(invExtra == null)
+                                    if (invExtra == null)
                                     {
                                         LogWarning("There was no variance for the invoice.");
                                         return;
@@ -154,11 +190,23 @@ namespace WAPPOPInvoice
                                     invExtra.UpdatedDate = Sage.Common.Clock.Now;
                                     invExtra.UpdatedUser = Sage.Accounting.Application.ActiveUserName;
                                     invExtra.Urgent = false; //Optionally all you can mark invoices as urgent here
-                                    invExtra.WAPNotes = string.Empty; //Optionally you can add some additional notes to send to WAP here.
+                                    invExtra.WAPNotes = $"Extra Notes - {Environment.TickCount}"; //Optionally you can add some additional notes to send to WAP here.
 
                                     //Save the changes to the Sage database
                                     invExtra.Update();
 
+                                    LogSuccess($"Invoice Extra Record Created with Id '{invExtra.SiconWAPInvExtra}'.");
+                                }
+                            }
+                            else
+                            {
+                                if (entry?.BatchItems?.First == null)
+                                {
+                                    LogWarning("No entry was posted.");
+                                }
+                                else
+                                {
+                                    LogGeneral($"Entry of type '{entry?.BatchItems?.First?.GetType()} was posted.");
                                 }
                             }
                         }
