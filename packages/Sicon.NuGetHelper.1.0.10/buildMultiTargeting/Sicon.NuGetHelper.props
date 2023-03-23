@@ -1,0 +1,25 @@
+<Project>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <!-- We expect this to be passed to MSBuild and NuGet via command line -->
+    <SiconPackageVersion>$(SiconPackageVersion)</SiconPackageVersion>
+    <!-- Includes all CS files automatically -->
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <DefineConstants>$(DefineConstants);SAGE2017</DefineConstants>
+    <ShortSageVersion>2017</ShortSageVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>$(MSBuildProjectName)</PackageId>
+    <AssemblyVersion>$(SiconPackageVersion)</AssemblyVersion>
+    <FileVersion>$(SiconPackageVersion).$(BUILDNO)</FileVersion>
+    <PackageProjectUrl>https://www.sicon.co.uk/</PackageProjectUrl>
+    <PackageIconUrl>https://www.sicon.co.uk/wp-content/themes/sicon-web/img/sicon-logo.png</PackageIconUrl>
+    <RepositoryUrl />
+    <Copyright>Sicon Ltd</Copyright>
+    <Authors>Sicon</Authors>
+    <Company>Sicon Ltd</Company>
+    <Version>$(SiconPackageVersion)</Version>
+	<DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+</Project>
