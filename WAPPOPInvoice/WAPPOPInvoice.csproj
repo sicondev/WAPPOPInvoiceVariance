@@ -119,7 +119,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Sage.Accounting.Datamodel, Version=19.0.0.0, Culture=neutral, PublicKeyToken=12655784e6b771dd, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sage.Accounting.DataModel.220.0.29\lib\net452\Sage.Accounting.Datamodel.dll</HintPath>
+      <HintPath>..\packages\Sage.Accounting.DataModel.221.6.19.5\lib\net452\Sage.Accounting.Datamodel.dll</HintPath>
     </Reference>
     <Reference Include="Sage.Accounting.Exceptions.Commercials, Version=19.0.0.0, Culture=neutral, PublicKeyToken=b2daa66d74953d11, processorArchitecture=MSIL">
       <HintPath>..\packages\Sage200c.Objects.20.0.17221.8\lib\net35\Sage.Accounting.Exceptions.Commercials.dll</HintPath>
@@ -581,17 +581,17 @@
       <HintPath>..\packages\Sage200c.Web.20.0.17221.3\lib\net35\Sage.Web.Services.AutoStartProvider.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Sicon.API, Version=220.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sicon.API.220.0.0\lib\net45\Sicon.API.dll</HintPath>
+    <Reference Include="Sicon.API, Version=221.1.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sicon.API.221.1.5\lib\net45\Sicon.API.dll</HintPath>
     </Reference>
-    <Reference Include="Sicon.API.Sage200.Objects, Version=220.0.29.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sicon.API.Sage200.Objects.220.0.29\lib\net452\Sicon.API.Sage200.Objects.dll</HintPath>
+    <Reference Include="Sicon.API.Sage200.Objects, Version=221.6.19.5, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sicon.API.Sage200.Objects.221.6.19.5\lib\net452\Sicon.API.Sage200.Objects.dll</HintPath>
     </Reference>
-    <Reference Include="Sicon.Sage200.Architecture.BLL, Version=220.0.29.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sicon.Sage200.Architecture.BLL.220.0.29\lib\net452\Sicon.Sage200.Architecture.BLL.dll</HintPath>
+    <Reference Include="Sicon.Sage200.Architecture.BLL, Version=221.6.19.5, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sicon.Sage200.Architecture.BLL.221.6.19.5\lib\net452\Sicon.Sage200.Architecture.BLL.dll</HintPath>
     </Reference>
-    <Reference Include="Sicon.Sage200.WAP.AddonPackage.Objects, Version=220.0.11.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sicon.Sage200.WAP.AddonPackage.Objects.220.0.11\lib\net452\Sicon.Sage200.WAP.AddonPackage.Objects.dll</HintPath>
+    <Reference Include="Sicon.Sage200.WAP.AddonPackage.Objects, Version=221.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sicon.Sage200.WAP.AddonPackage.Objects.221.4.0\lib\net452\Sicon.Sage200.WAP.AddonPackage.Objects.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
