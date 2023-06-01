@@ -96,10 +96,12 @@ namespace WAPPOPInvoice
                 decimal orderLineTaxValue = 0m;
                 decimal invoiceValue = 150m;
                 decimal invoiceTaxValue = 0m;
+                decimal orderLineQuantity = 1m;
+                decimal invoiceLineQuantity = 1m;
 
                 using (Sage.Accounting.POP.POPOrder popOrder = new Sage.Accounting.POP.POPOrder())
                 {
-                    popOrder.Supplier = Sage.Accounting.PurchaseLedger.SupplierFactory.Factory.Fetch("18G001");
+                    popOrder.Supplier = Sage.Accounting.PurchaseLedger.SupplierFactory.Factory.Fetch("ATL001");
                     popOrder.DocumentNo = $"SICON{Environment.TickCount}";
 
                     popOrder.Update();
@@ -108,7 +110,7 @@ namespace WAPPOPInvoice
 
                     line.POPOrderReturn = popOrder;
                     line.ItemDescription = "Test Line";
-                    line.LineQuantity = 1;
+                    line.LineQuantity = orderLineQuantity;
                     line.UnitBuyingPrice = orderLineValue;
                     line.LineTaxValue = orderLineTaxValue;
                     line.ConfirmationIntentType = Sage.Accounting.POP.POPConfirmationIntentEnum.NoConfirmation;
@@ -140,7 +142,7 @@ namespace WAPPOPInvoice
                         foreach(Sage.Accounting.POP.POPInvCredItem item in coordinator.InvCredItems)
                         {
                             item.IsSelected = true;
-                            item.NewDiscountedUnitPrice = invoiceValue;
+                            item.LineUnitQuantity = invoiceLineQuantity;
 
                             LogGeneral($"Item '{item.ItemDescription}' selected?: {item.IsSelected}");
                         }
@@ -151,6 +153,9 @@ namespace WAPPOPInvoice
 
                         //Add allowable warning for values dont match
                         Sage.Accounting.Application.AllowableWarnings.Add(coordinator, typeof(Sage.Accounting.Exceptions.Ex20451Exception));
+
+                        //Not matched all lines to receipts
+                        Sage.Accounting.Application.AllowableWarnings.Add(coordinator, typeof(Sage.Accounting.Exceptions.Ex20541Exception));
 
                         using (Sicon.Sage200.WAP.AddonPackage.Objects.Objects.Instruments.POPInvoiceVarianceInstrument varianceInstrument = new Sicon.Sage200.WAP.AddonPackage.Objects.Objects.Instruments.POPInvoiceVarianceInstrument(coordinator))
                         {
@@ -175,6 +180,9 @@ namespace WAPPOPInvoice
                             if (entry?.BatchItems?.First is Sage.Accounting.TradeLedger.IPendingTradingBatchItem pendingItem
                                 && pendingItem?.TradeInstrument is Sage.Accounting.PurchaseLedger.PurchaseNotificationInstrument invoiceInstrument)
                             {
+                                invoiceInstrument.InstrumentNo = $"{Environment.TickCount}";
+                                invoiceInstrument.Update();
+
                                 LogSuccess($"Invoice '{(invoiceInstrument.InstrumentNo)}' Posted Successfully");
 
                                 using (Sicon.Sage200.WAP.AddonPackage.Objects.SiconWAPInvExtra invExtra = varianceInstrument.WAPInvoiceExtra)
@@ -195,7 +203,7 @@ namespace WAPPOPInvoice
                                     //Save the changes to the Sage database
                                     invExtra.Update();
 
-                                    LogSuccess($"Invoice Extra Record Created with Id '{invExtra.SiconWAPInvExtra}'.");
+  
                                 }
                             }
                             else
